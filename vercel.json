@@ -1,0 +1,8 @@
+{
+  "buildCommand": "echo 'No build needed'",
+  "outputDirectory": "public",
+  "installCommand": "echo 'No dependencies'",
+  "env": {
+    "ANTHROPIC_API_KEY": "@anthropic_api_key"
+  }
+}
