@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gordont - Cocina shica y sanita</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #fb923c;
+            --secondary: #f87171;
+            --accent: #f472b6;
+            --gradient: linear-gradient(135deg, #fb923c, #f87171);
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(180deg, #fef3c7, #fecaca);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: var(--gradient);
+            color: white;
+            padding: 1.25rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 { font-size: 22px; margin-bottom: 0.25rem; font-weight: 600; }
+        .header p { font-size: 12px; opacity: 0.9; }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem 7rem 1rem;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 13px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .btn-secondary {
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #333;
+            padding: 0.5rem 0.75rem;
+            width: auto;
+            font-size: 12px;
+        }
+
+        .recipe-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow);
+        }
+
+        .recipe-header {
+            background: var(--gradient);
+            color: white;
+            padding: 1rem;
+        }
+
+        .recipe-header h2 { font-size: 16px; margin-bottom: 0.5rem; }
+
+        .recipe-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 12px;
+            opacity: 0.95;
+            flex-wrap: wrap;
+        }
+
+        .recipe-content { padding: 1rem; }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .nutrition-card {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .nutrition-label {
+            font-size: 10px;
+            color: #0369a1;
+            font-weight: 600;
+        }
+
+        .nutrition-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0c4a6e;
+        }
+
+        .ingredient-list {
+            list-style: none;
+            font-size: 13px;
+        }
+
+        .ingredient-list li { padding: 0.3rem 0; }
+
+        .guarnicion {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 0.6rem;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #15803d;
+        }
+
+        .recipe-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            font-size: 10px;
+        }
+
+        .nav-item {
+            border: none;
+            background: white;
+            cursor: pointer;
+            padding: 0.6rem 0.4rem;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            border-top: 3px solid transparent;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            border-top-color: var(--primary);
+        }
+
+        .nav-icon { font-size: 18px; display: block; margin-bottom: 0.2rem; }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 13px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #999;
+        }
+
+        .tab-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.6rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .tab-btn.active {
+            background: var(--gradient);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .recipe-mini {
+            background: white;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .recipe-mini-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 0.25rem;
+        }
+
+        .day-container {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1rem;
+            background: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .day-container.today {
+            border-color: var(--primary);
+            background: #fef3c7;
+        }
+
+        .day-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .today-badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍳 Gordont</h1>
+        <p>Cocina shica y sanita</p>
+    </div>
+
+    <div class="container">
+        <div id="explorar" class="view active">
+            <div class="card">
+                <div class="form-group">
+                    <label>¿Quién es?</label>
+                    <input type="text" id="username" placeholder="Tu nombre..." value="">
+                </div>
+
+                <div class="form-group">
+                    <label>Ingrediente base</label>
+                    <input type="text" id="ingredient" placeholder="Ej: merluza, pollo...">
+                </div>
+
+                <div class="form-group">
+                    <label>Personas</label>
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.5rem;">
+                            <button id="minus" style="width: 32px; height: 32px; border: none; background: white; border-radius: 6px; cursor: pointer;">−</button>
+                            <div style="min-width: 40px; text-align: center; font-weight: 500;" id="servings">2</div>
+                            <button id="plus" style="width: 32px; height: 32px; border: none; background: white; border-radius: 6px; cursor: pointer;">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="generateBtn">✨ Generar 2 recetas</button>
+            </div>
+
+            <div id="error" class="error" style="display: none;"></div>
+            <div id="loading" class="loading" style="display: none;"><div style="font-size: 32px;">✨</div><p>Generando recetas...</p></div>
+            <div id="recipes"></div>
+        </div>
+
+        <div id="misrecetas" class="view">
+            <div class="tab-group">
+                <button class="tab-btn active" onclick="filterRecipes('guardadas')">📌 Guardadas</button>
+                <button class="tab-btn" onclick="filterRecipes('preparar')">👨‍🍳 Por Preparar</button>
+                <button class="tab-btn" onclick="filterRecipes('realizadas')">✅ Realizadas</button>
+            </div>
+            <div id="recipes-list"></div>
+        </div>
+
+        <div id="listacompras" class="view">
+            <div class="card">
+                <h3 style="margin-bottom: 1rem; font-size: 16px;">🛒 Lista de Compras</h3>
+                <div id="shopping-list"></div>
+            </div>
+        </div>
+
+        <div id="calendario" class="view">
+            <div class="card">
+                <h3 style="margin-bottom: 1rem; font-size: 16px;">📅 Semana</h3>
+                <div id="calendar-grid"></div>
+            </div>
+        </div>
+
+        <div id="tracker" class="view">
+            <div class="card">
+                <h3 style="margin-bottom: 1rem; font-size: 16px;">📸 Mi Semana</h3>
+                <div id="tracker-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item active" data-view="explorar" onclick="switchView('explorar', this)"><span class="nav-icon">🔍</span>Explorar</button>
+        <button class="nav-item" data-view="misrecetas" onclick="switchView('misrecetas', this)"><span class="nav-icon">📖</span>Recetas</button>
+        <button class="nav-item" data-view="listacompras" onclick="switchView('listacompras', this)"><span class="nav-icon">🛒</span>Compras</button>
+        <button class="nav-item" data-view="calendario" onclick="switchView('calendario', this)"><span class="nav-icon">📅</span>Semana</button>
+        <button class="nav-item" data-view="tracker" onclick="switchView('tracker', this)"><span class="nav-icon">📸</span>Tracker</button>
+    </div>
+
+    <script>
+        let appState = {
+            username: localStorage.getItem('gordont-username') || 'Chef',
+            servings: parseInt(localStorage.getItem('gordont-servings')) || 2,
+            currentRecipes: [],
+            recipes: { guardadas: [], preparar: [], realizadas: [] },
+            scheduled: Array(7).fill(null).map(() => []),
+            currentRecipeTab: 'guardadas'
+        };
+
+        const saved = localStorage.getItem('gordont-state');
+        if (saved) {
+            try {
+                appState = { ...appState, ...JSON.parse(saved) };
+            } catch (e) {}
+        }
+
+        const saveState = () => {
+            localStorage.setItem('gordont-state', JSON.stringify(appState));
+            localStorage.setItem('gordont-username', appState.username);
+            localStorage.setItem('gordont-servings', appState.servings);
+        };
+
+        function switchView(viewName, element) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(viewName).classList.add('active');
+            element.classList.add('active');
+
+            if (viewName === 'misrecetas') displayRecipesList();
+            if (viewName === 'listacompras') displayShoppingList();
+            if (viewName === 'calendario') displayCalendar();
+            if (viewName === 'tracker') displayTracker();
+        }
+
+        document.getElementById('minus').addEventListener('click', () => {
+            appState.servings = Math.max(1, appState.servings - 1);
+            document.getElementById('servings').textContent = appState.servings;
+            saveState();
+        });
+
+        document.getElementById('plus').addEventListener('click', () => {
+            appState.servings += 1;
+            document.getElementById('servings').textContent = appState.servings;
+            saveState();
+        });
+
+        document.getElementById('generateBtn').addEventListener('click', generateRecipes);
+
+        async function generateRecipes() {
+            const username = document.getElementById('username').value.trim() || 'Chef';
+            const ingredient = document.getElementById('ingredient').value.trim();
+
+            if (!ingredient) {
+                showError('Ingresa un ingrediente');
+                return;
+            }
+
+            appState.username = username;
+            saveState();
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('recipes').innerHTML = '';
+            hideError();
+
+            try {
+                const month = new Date().toLocaleString('es-AR', { month: 'long' });
+                
+                const response = await fetch('/api/recipes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ingredient: ingredient,
+                        servings: appState.servings,
+                        month: month
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error: ' + response.status);
+                }
+
+                const data = await response.json();
+                appState.currentRecipes = data.recipes;
+                displayRecipes();
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayRecipes() {
+            const recipesDiv = document.getElementById('recipes');
+            recipesDiv.innerHTML = appState.currentRecipes.map((recipe, recipeIdx) => {
+                return `
+                <div class="recipe-card">
+                    <div class="recipe-header">
+                        <h2>${recipe.nombre}</h2>
+                        <div class="recipe-meta">
+                            <span>${recipe.dificultad} • ⏱️ ${recipe.tiempo}</span>
+                        </div>
+                    </div>
+                    <div class="recipe-content">
+                        <div style="margin-bottom: 1rem;">
+                            <div class="section-title">Técnica</div>
+                            <p style="font-size: 13px;">${recipe.tecnica}</p>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <div class="section-title">Ingredientes</div>
+                            <ul class="ingredient-list">
+                                ${recipe.ingredientes.map(ing => `<li>✓ ${ing}</li>`).join('')}
+                            </ul>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <div class="section-title">🥘 Guarnición</div>
+                            <div class="guarnicion">${recipe.guarnicion}</div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <div class="section-title">Nutrición</div>
+                            <div class="nutrition-grid">
+                                <div class="nutrition-card">
+                                    <div class="nutrition-label">Cal</div>
+                                    <div class="nutrition-value">${recipe.nutricion.calorias}</div>
+                                </div>
+                                <div class="nutrition-card">
+                                    <div class="nutrition-label">Prot</div>
+                                    <div class="nutrition-value">${recipe.nutricion.proteinas}</div>
+                                </div>
+                                <div class="nutrition-card">
+                                    <div class="nutrition-label">Carb</div>
+                                    <div class="nutrition-value">${recipe.nutricion.carbohidratos}</div>
+                                </div>
+                                <div class="nutrition-card">
+                                    <div class="nutrition-label">Grasas</div>
+                                    <div class="nutrition-value">${recipe.nutricion.grasas}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <div class="section-title">💡 Tips</div>
+                            ${recipe.tips.map(tip => `<p style="font-size: 12px; background: #fef3c7; padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; color: #78350f;">✦ ${tip}</p>`).join('')}
+                        </div>
+
+                        <div class="recipe-actions">
+                            <button class="btn btn-secondary" onclick="saveRecipe(${recipeIdx}, 'guardadas')">📌 Guardar</button>
+                            <button class="btn btn-secondary" onclick="saveRecipe(${recipeIdx}, 'preparar')">👨‍🍳 Preparar</button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function saveRecipe(recipeIdx, status) {
+            const recipe = appState.currentRecipes[recipeIdx];
+            appState.recipes[status].push({
+                id: Date.now() + Math.random(),
+                nombre: recipe.nombre,
+                ingredientes: recipe.ingredientes,
+                nutricion: recipe.nutricion,
+                dificultad: recipe.dificultad,
+                tiempo: recipe.tiempo,
+                tecnica: recipe.tecnica,
+                guarnicion: recipe.guarnicion,
+                tips: recipe.tips,
+                planificadoPor: appState.username,
+                fecha: new Date().toISOString()
+            });
+            saveState();
+            alert(`✅ Guardado en ${status === 'preparar' ? 'Por Preparar' : status}`);
+        }
+
+        function filterRecipes(tab) {
+            appState.currentRecipeTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            displayRecipesList();
+        }
+
+        function displayRecipesList() {
+            const recipes = appState.recipes[appState.currentRecipeTab];
+            const listDiv = document.getElementById('recipes-list');
+
+            if (recipes.length === 0) {
+                listDiv.innerHTML = `<div class="empty-state"><p>📭 No hay recetas</p></div>`;
+                return;
+            }
+
+            listDiv.innerHTML = recipes.map(r => `
+                <div class="recipe-mini">
+                    <div class="recipe-mini-title">${r.nombre}</div>
+                    <p style="font-size: 11px; color: #666;">${r.dificultad} • ${r.tiempo} • ${r.nutricion.calorias} cal</p>
+                    <button class="btn-secondary" onclick="deleteRecipe(${r.id}, '${appState.currentRecipeTab}')">🗑️ Eliminar</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteRecipe(id, tab) {
+            appState.recipes[tab] = appState.recipes[tab].filter(r => r.id !== id);
+            saveState();
+            displayRecipesList();
+        }
+
+        function displayShoppingList() {
+            const listDiv = document.getElementById('shopping-list');
+            const recipes = appState.recipes.preparar;
+
+            if (recipes.length === 0) {
+                listDiv.innerHTML = `<div class="empty-state"><p>Agrega recetas a "Por Preparar"</p></div>`;
+                return;
+            }
+
+            let html = '';
+            recipes.forEach(r => {
+                html += `<div style="margin-bottom: 1rem;"><div style="font-weight: 600; color: var(--primary); margin-bottom: 0.5rem;">${r.nombre}</div>`;
+                r.ingredientes.forEach((ing, i) => {
+                    html += `<label style="display: block; padding: 0.5rem; cursor: pointer; margin-bottom: 0.25rem;"><input type="checkbox" style="margin-right: 0.5rem;"> ${ing}</label>`;
+                });
+                html += `</div>`;
+            });
+
+            listDiv.innerHTML = html;
+        }
+
+        function displayCalendar() {
+            const gridDiv = document.getElementById('calendar-grid');
+            const today = new Date();
+            const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            
+            let html = '';
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + i);
+                const isToday = date.toDateString() === today.toDateString();
+                
+                html += `<div class="day-container ${isToday ? 'today' : ''}">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>
+                            <div class="day-title">${dayNames[date.getDay()]}</div>
+                            <div style="font-size: 12px; color: #999;">${date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}</div>
+                        </div>
+                        ${isToday ? '<div class="today-badge">Hoy</div>' : ''}
+                    </div>
+                </div>`;
+            }
+            gridDiv.innerHTML = html;
+        }
+
+        function displayTracker() {
+            document.getElementById('tracker-grid').innerHTML = `<div class="empty-state"><p>📸 Tracker de recetas</p></div>`;
+        }
+
+        function showError(msg) {
+            document.getElementById('error').textContent = msg;
+            document.getElementById('error').style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        document.getElementById('username').value = appState.username;
+        document.getElementById('servings').textContent = appState.servings;
+    </script>
+</body>
+</html>
